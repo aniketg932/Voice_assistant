@@ -10,7 +10,7 @@ Windows has Sapi5 and Linux has Espeak which can help us in having the voice fro
 
 Installation-
 For windows users
-(run those in command prompt/cmt/terminal)
+(run those in command prompt/cmd/terminal)
 * For SKYE to listen to our voice/speech pip install speechRecognition
 * To speak out, or text to speech pip install pyttsx3
 * For advance control on browser pip install pywhatkit
