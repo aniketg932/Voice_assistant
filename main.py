@@ -11,5 +11,3 @@ def speak(str):
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     speak("Hello, How are You!!")
-    speak("Name- Aniket Kumar Gupta")
-    speak("Prime's Gaming - Please Like and Subscribe")
