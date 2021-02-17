@@ -1,3 +1,4 @@
+import requests
 import speech_recognition as sr
 from voice import engine
 import webbrowser as wb
@@ -10,8 +11,6 @@ import sys
 from weather import weather
 import datetime
 import time
-import pyjokes
-
 
 def speak(audio):
     engine.say(audio)
@@ -35,7 +34,7 @@ def command():
     return query
 
 def wish():
-    speak("Hello sir")
+    #speak("Hello sir")
     hour = int(datetime.datetime.now().hour)
     t = time.strftime("%I:%M:%p")
 
@@ -47,8 +46,20 @@ def wish():
         speak(f"Good Evening,its {t}")
     speak("I am Skye,how can i help you !!")
 
+def news():
+    url = 'http://newsapi.org/v2/top-headlines?sources=techcrunch&apiKey=437c65dddca5420a8e5d3801124077b5'
+    page = requests.get(url).json()
+    articles = page["articles"]
+    head = []
+    day=["1","2","3","4","5"]
+    for ar in articles:
+        head.append(ar["title"])
+    for i in range(len(day)):
+        speak(f"{day[i]} news: {head[i]}")
 
-if __name__ == '__main__':
+
+#if __name__ == '__main__':
+def Execution():
     wish()
     while True:
         a = command().lower()
@@ -60,6 +71,10 @@ if __name__ == '__main__':
             else:
                 wb.open(
                     f'https://www.google.com/search?sxsrf=ALeKk00KN9RiA4lwoluF9_ZiM4dyeVqmsw%3A1611300263015&source=hp&ei=pn0KYIHaO6rYz7sP5ZqDgAI&q={str}&oq=&gs_lcp=CgZwc3ktYWIQARgAMgcIIxDqAhAnMgcIIxDqAhAnMgcIIxDqAhAnMgcIIxDqAhAnMgcIIxDqAhAnMgcIIxDqAhAnMgcIIxDqAhAnMgcIIxDqAhAnMgcIIxDqAhAnMgcIIxDqAhAnUABYAGDMTGgCcAB4AIABAIgBAJIBAJgBAKoBB2d3cy13aXqwAQo&sclient=psy-ab')
+
+        elif "update news" in a:
+            speak("Please wait,Its getting load")
+            news()
 
         elif 'blog' in a:
             print('Welcome to my blog posts')
@@ -113,8 +128,51 @@ if __name__ == '__main__':
         elif "play song on youtube" in a:
             pk.playonyt("We The Kings-Sad Song")
 
-        elif "no thanks" in a:
+
+        elif "set an alarm" in a:
+            t=int(datetime.datetime.now().hour)
+            if t==20:
+                music_dir = "C:\\Users\\KIIT\\Music"
+                songs=os.listdir(music_dir)
+                os.startfile(os.path.join(music_dir,songs[0]))
+
+        elif "shut down" in a:
+            os.system("shutdown /s /t 5")
+
+        elif "restart system" in a:
+            os.system("shutdown /r /t 5")
+
+        #elif "sleep system" in a:
+        #os.system("rundll32.exe powrprof.dll,SetSuspendState 0,1,0")
+
+        elif "hello" in a or "hi" in a:
+            speak("Hello sir, how can i help you?")
+
+        elif "how are you" in a:
+            speak("I am fine, what about you!")
+
+        elif "me also good" in a or "me fine" in a:
+            speak("That's great to hear from you sir.")
+
+        elif "thank you" in a:
+            speak("It's my plasure for you sir.")
+
+        elif "you may sleep now,skye" in a or "go to sleep,skye" in a:
+            speak("Okay sir,I am going to sleep you can call me anytime")
+            break
+
+        elif "thanks" in a:
             speak("Thanks for taking my help sir,Have a good day!!")
             sys.exit()
 
-        speak("Sir,do you have any other work??")
+        #speak("Sir,do you have any other work??")
+
+if __name__ == '__main__':
+    while True:
+        pm = command().lower()
+        if "wake up" in pm:
+            Execution()
+        elif "goodbye" in pm:
+            speak("Thanks for using me sir,have a good day")
+            sys.exit()
+
