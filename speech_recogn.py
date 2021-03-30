@@ -10,7 +10,7 @@ import pywhatkit as pk
 import sys
 from weather import weather
 import datetime
-import time
+import json
 
 def speak(audio):
     engine.say(audio)
@@ -21,10 +21,9 @@ def command():
     r = sr.Recognizer()
     with sr.Microphone() as source:
         print('Speak up...')
-        r.pause_threshold = 1
+        r.pause_threshold = 0.8
         print('Recognizing....')
         audio = r.listen(source,timeout=10, phrase_time_limit=10)
-
     try:
         query = r.recognize_google(audio, language="en-in")
         print(f"User said {query}")
@@ -36,7 +35,7 @@ def command():
 def wish():
     #speak("Hello sir")
     hour = int(datetime.datetime.now().hour)
-    t = time.strftime("%I:%M:%p")
+    t = datetime.datetime.now().strftime('%I:%M:%p')
 
     if 0 <= hour <= 12:
         speak(f"Good Morning,its {t}")
@@ -47,18 +46,54 @@ def wish():
     speak("I am Skye,how can i help you !!")
 
 def news():
-    url = 'http://newsapi.org/v2/top-headlines?sources=techcrunch&apiKey=437c65dddca5420a8e5d3801124077b5'
-    page = requests.get(url).json()
-    articles = page["articles"]
-    head = []
-    day=["1","2","3","4","5"]
-    for ar in articles:
-        head.append(ar["title"])
-    for i in range(len(day)):
-        speak(f"{day[i]} news: {head[i]}")
+    welcome = ["Welcome to The Automated News Reader", "So what you wanna hear?", "lets roll some news"]
+
+    dict1 = {1: "business", 2: "entertainment", 3: "general", 4: "health", 5: "science", 6: "sports", 7: "technology"}
+    # dict2 = {1: "in", 2: "23"}
+
+    y = random.choice(welcome)
+    speak(y)
+    print("1.business\n2.entertainment\n3.general\n4.health\n5.science\n6.sports\n7.technology\n")
+    speak(
+        "Enter the type of the news you wanna hear: \n1 for business\n2 for entertainment\n3 for general\n4 for health\n5 for science\n6 for sports\n7 for technology\n")
+    # print(dict1[x])
+    x = int(input("choice: "))
+    if x > 7 or x < 1:
+        speak("Wrong Choice...Please select a valid input")
+        sys.exit()
+
+    else:
+        r = requests.get(f"http://newsapi.org/v2/top-headlines?country=in&category={dict1[x]}&apiKey=08aca3a0d644499580c2868e6eb17798")
+        data = r.text
+        parsed = json.loads(data)
+        # print(x,dict2[x])
+        #print(parsed)
+        speak(f"So these are TOP 5 headlines of {dict1[x]} category")
+        for i in range(1,6):
+            if (i < 5):
+                speak(f"so the number {i} news is ")
+                speak(parsed['articles'][i]['title'])
+            else:
+                speak(f"the last but not the least ")
+                speak(parsed['articles'][i]['title'])
 
 
-#if __name__ == '__main__':
+def weather():
+    API_key = "3c18c5a77fa131312dbdb5974c055e67"
+    base_url = "http://api.openweathermap.org/data/2.5/weather?"
+    city ="West bengal"
+    Final_url = base_url + "appid=" + API_key + "&q=" + city
+    weather_data = requests.get(Final_url).json()
+    temp = round(weather_data['main']['temp'] - 273.15)
+    wind_speed = weather_data['wind']['speed']
+    description = weather_data['weather'][0]['description']
+
+
+    speak("Temperature is " + str(temp) + " degree celsius.")
+    speak("Wind Speed is " + str(wind_speed) + " kilometers per hour.")
+    speak(str(description) + " is my prediction")
+
+
 def Execution():
     wish()
     while True:
@@ -69,8 +104,7 @@ def Execution():
             if 'page' in string:
                 wb.open('https://www.google.com/')
             else:
-                wb.open(
-                    f'https://www.google.com/search?sxsrf=ALeKk00KN9RiA4lwoluF9_ZiM4dyeVqmsw%3A1611300263015&source=hp&ei=pn0KYIHaO6rYz7sP5ZqDgAI&q={str}&oq=&gs_lcp=CgZwc3ktYWIQARgAMgcIIxDqAhAnMgcIIxDqAhAnMgcIIxDqAhAnMgcIIxDqAhAnMgcIIxDqAhAnMgcIIxDqAhAnMgcIIxDqAhAnMgcIIxDqAhAnMgcIIxDqAhAnMgcIIxDqAhAnUABYAGDMTGgCcAB4AIABAIgBAJIBAJgBAKoBB2d3cy13aXqwAQo&sclient=psy-ab')
+                wb.open(f'https://www.google.com/search?sxsrf=ALeKk00KN9RiA4lwoluF9_ZiM4dyeVqmsw%3A1611300263015&source=hp&ei=pn0KYIHaO6rYz7sP5ZqDgAI&q={str}&oq=&gs_lcp=CgZwc3ktYWIQARgAMgcIIxDqAhAnMgcIIxDqAhAnMgcIIxDqAhAnMgcIIxDqAhAnMgcIIxDqAhAnMgcIIxDqAhAnMgcIIxDqAhAnMgcIIxDqAhAnMgcIIxDqAhAnMgcIIxDqAhAnUABYAGDMTGgCcAB4AIABAIgBAJIBAJgBAKoBB2d3cy13aXqwAQo&sclient=psy-ab')
 
         elif "update news" in a:
             speak("Please wait,Its getting load")
@@ -79,9 +113,6 @@ def Execution():
         elif 'blog' in a:
             print('Welcome to my blog posts')
             wb.open('https://aniketguptasite.wordpress.com/')
-
-        elif 'about weather' in a:
-            weather()
 
         elif 'open command prompt' in a:
             os.system('start cmd')
@@ -93,23 +124,23 @@ def Execution():
         elif 'play music' in a:
             music_dir = "C:\\Users\\KIIT\\Music"
             songs = os.listdir(music_dir)
-            rm = random.choice(songs)
-            os.startfile(os.path.join(music_dir, rm))
+            rm=random.randint(1,40)
+            os.startfile(os.path.join(music_dir,songs[rm]))
 
         elif 'open codeblocks' in a:
-            npath = "C:\Program Files (x86)\CodeBlocks\\codeblocks.exe"
+            npath="C:\Program Files (x86)\CodeBlocks\\codeblocks.exe"
             os.startfile(npath)
 
-        elif 'open camera' in a:
-            cam = cv2.VideoCapture(0)
-            while True:
-                ret, img = cam.read()
-                cv2.imshow('webcam',img)
-                p = cv2.waitKey(50)
-                if p == 20:
-                    break
-                cam.release()
-                cv2.destroyAllWindows()
+        # elif 'open camera' in a:
+        #     cam = cv2.VideoCapture(0)
+        #     while True:
+        #         ret, img = cam.read()
+        #         cv2.imshow('webcam',img)
+        #         p = cv2.waitKey(50)
+        #         if p == 20:
+        #             break
+        #         cam.release()
+        #         cv2.destroyAllWindows()
 
         elif "open youtube" in a:
             wb.open("https://www.youtube.com/?reload=9")
@@ -121,13 +152,8 @@ def Execution():
             speak("according to wikipedia")
             speak(results)
 
-        elif "send message" in a:
-            # take a maximum gap of 2 min
-            pk.sendwhatmsg("+917606895156","Hi,it's me Aniket",10,10)
-
         elif "play song on youtube" in a:
             pk.playonyt("We The Kings-Sad Song")
-
 
         elif "set an alarm" in a:
             t=int(datetime.datetime.now().hour)
@@ -142,8 +168,12 @@ def Execution():
         elif "restart system" in a:
             os.system("shutdown /r /t 5")
 
-        #elif "sleep system" in a:
-        #os.system("rundll32.exe powrprof.dll,SetSuspendState 0,1,0")
+
+        elif "weather" in a or "climate" in a:
+            try:
+                weather()
+            except Exception as e:
+                speak("Due to some trouble, i couldn't find the exact weather_data")
 
         elif "hello" in a or "hi" in a:
             speak("Hello sir, how can i help you?")
@@ -163,9 +193,8 @@ def Execution():
 
         elif "thanks" in a:
             speak("Thanks for taking my help sir,Have a good day!!")
-            sys.exit()
 
-        #speak("Sir,do you have any other work??")
+        #speak("Sir,do you have any other work ??")
 
 if __name__ == '__main__':
     while True:
@@ -175,4 +204,3 @@ if __name__ == '__main__':
         elif "goodbye" in pm:
             speak("Thanks for using me sir,have a good day")
             sys.exit()
-
